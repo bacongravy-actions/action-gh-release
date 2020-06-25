@@ -1,4 +1,4 @@
-import { paths, parseConfig, isTag } from "./util";
+import { paths, parseConfig, isTag, unmatchedPatterns } from "./util";
 import { release, upload, GitHubReleaser } from "./github";
 import { setFailed, setOutput } from "@actions/core";
 import { GitHub } from "@actions/github";
@@ -9,6 +9,15 @@ async function run() {
     const config = parseConfig(env);
     if (!config.input_tag_name && !isTag(config.github_ref)) {
       throw new Error(`⚠️ GitHub Releases requires a tag`);
+    }
+    if (config.input_files) {
+      const patterns = unmatchedPatterns(config.input_files);
+      patterns.forEach(pattern =>
+        console.warn(`Pattern '${pattern}' does not match any files.`)
+      );
+      if (patterns.length > 0 && config.input_fail_on_unmatched_files) {
+        throw new Error(`⚠️ There were unmatched files`);
+      }
     }
     GitHub.plugin([
       require("@octokit/plugin-throttling"),
