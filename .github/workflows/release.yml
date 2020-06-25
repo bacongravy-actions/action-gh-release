@@ -26,5 +26,6 @@ jobs:
         with:
           files: |
             *.tgz
+            does_not_exist.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
